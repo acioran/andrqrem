@@ -149,7 +149,6 @@ class LiveAndroidFeed():
             self.counter_emptyimgs += 1
             if self.counter_emptyimgs > self.MAX_EMPTYIMGS:
                 print("TODO")
-                exit(-1)
         else:
             self.counter_emptyimgs = 0
 
@@ -243,12 +242,14 @@ class MinicapWorker(threading.Thread):
         subprocess.call("adb forward tcp:" + str(port) + " localabstract:minicap", shell=True)
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.settimeout(1)
         self.sock.connect((ip, port))
 
         self.parseGlobalHeader()
         threading.Thread.__init__(self)
 
     def closeMinicap(self):
+        self.sock.close()
         self.keepRunning = False
 
     def cleanUp(self):
@@ -291,7 +292,10 @@ class MinicapWorker(threading.Thread):
         while len_read < frame_size:
             data = self.sockReceive(1024)
             self.frame.write(data)
-            len_read += len(data)
+            if len(data) != 0:
+                len_read += len(data)
+            else:
+                print("EMPTY READ", len_read)
 
         self.frame.seek(0)
         img = Image.open(self.frame)
@@ -299,9 +303,14 @@ class MinicapWorker(threading.Thread):
         return img
 
     def sockReceive(self, length):
-        data, ancdata, msg_flags, address = self.sock.recvmsg(length, 1024)
-        for elem in ancdata:
-            print(elem)
+        try:
+            data, address = self.sock.recvfrom(length, 1024)
+        except socket.timeout:
+            print("TIMEOUT OCCURED")
+            data = b""
+
+        if address != None:
+            print(address);
 
         return data
 
