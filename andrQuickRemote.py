@@ -147,8 +147,6 @@ class LiveAndroidFeed():
         if bad is True:
             self.dbg("EMPTY IMAGE")
             self.counter_emptyimgs += 1
-            if self.counter_emptyimgs > self.MAX_EMPTYIMGS:
-                print("TODO")
         else:
             self.counter_emptyimgs = 0
 
@@ -156,6 +154,8 @@ class LiveAndroidFeed():
 
             self.tk_canvas.itemconfig(self.tk_img_on_canvas, image=tkimg)
             self.queue_img.task_done()
+        
+        #Reschedule the task
         self.job_imgUpdateCanvas = self.parent.after(self.time_refresh, self.imgUpdateCanvas)
 
     '''
