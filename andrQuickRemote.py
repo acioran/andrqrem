@@ -249,11 +249,11 @@ class MinicapWorker(threading.Thread):
         threading.Thread.__init__(self)
 
     def closeMinicap(self):
-        self.sock.close()
         self.keepRunning = False
 
     def cleanUp(self):
         self.sock.shutdown(socket.SHUT_WR)
+        self.sock.close()
         subprocess.call("adb forward --remove tcp:" + str(self.port), shell=True)
         self.adb_minicap.close()
         print("Minicap CLOSING!")
@@ -303,14 +303,11 @@ class MinicapWorker(threading.Thread):
         return img
 
     def sockReceive(self, length):
+        data = b""
         try:
             data, address = self.sock.recvfrom(length, 1024)
         except socket.timeout:
             print("TIMEOUT OCCURED")
-            data = b""
-
-        if address != None:
-            print(address);
 
         return data
 
