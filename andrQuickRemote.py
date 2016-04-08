@@ -343,7 +343,7 @@ class ADBWorker(threading.Thread):
         self.cleanUp()
 
 class KBDWorker(threading.Thread):
-    def __init__(self, queue, ip, port, sleep_time_ms=30):
+    def __init__(self, queue, ip, port, sleep_time_ms=3):
         self.__queue = queue
         self.port = port
 
